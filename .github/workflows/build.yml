@@ -56,7 +56,7 @@ jobs:
     - name: Build and push
       run: |
         # 이미지 이름 구성
-        IMAGE="${{ secrets.DOCKER_USERNAME }}/simple-gitops"
+        IMAGE="gaver1213/simple-gitops"
         
         # 빌드 (두 개의 태그 생성)
         # 왜 두 개? 
@@ -73,4 +73,4 @@ jobs:
         docker push ${IMAGE}:latest
         
         echo "✅ 빌드 완료!"
-        echo "🔗 https://hub.docker.com/r/${{ secrets.DOCKER_USERNAME }}/simple-gitops"
+        echo "🔗 https://hub.docker.com/r/gaver1213/simple-gitops"
