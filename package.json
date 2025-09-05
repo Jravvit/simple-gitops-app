@@ -1,0 +1,15 @@
+  {
+    "name": "simple-gitops-app",
+    "version": "1.0.0",
+    "description": "GitOps 데모 애플리케이션",
+    "main": "app.js",
+    "scripts": {
+      "start": "node app.js"
+    },
+    "dependencies": {
+      "express": "^4.18.2"
+    },
+    "engines": {
+      "node": ">=18.0.0"
+    }
+  }
