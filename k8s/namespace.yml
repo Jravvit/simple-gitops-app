@@ -1,0 +1,15 @@
+# k8s/namespace.yaml 파일 생성
+
+# Namespace가 뭔가요?
+# - Kubernetes 클러스터 내의 가상 공간
+# - 같은 클러스터에서 여러 팀/프로젝트 격리
+# - 예: dev-namespace, prod-namespace로 환경 분리
+
+apiVersion: v1  # Kubernetes API 버전 (고정값)
+kind: Namespace  # 만들 리소스 종류
+metadata:
+  name: gitops-app  # Namespace 이름
+  labels:
+    environment: demo  # 라벨 (태그 같은 것)
+    managed-by: argocd  # ArgoCD가 관리한다는 표시
+    # 왜 라벨? 나중에 필터링, 검색에 사용

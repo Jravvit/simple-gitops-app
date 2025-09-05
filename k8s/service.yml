@@ -1,0 +1,37 @@
+# k8s/service.yaml 파일 생성
+
+# Service가 뭔가요?
+# - Pod의 네트워크 진입점 (Pod의 고정 주소)
+# - Pod IP는 재시작하면 바뀌는데, Service는 고정
+# - 로드밸런싱 기능 (여러 Pod에 트래픽 분산)
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: simple-app-service
+  namespace: gitops-app
+  labels:
+    app: simple-app
+spec:
+  # Service 타입 종류:
+  # - ClusterIP: 클러스터 내부만 접근 (기본값)
+  # - NodePort: 노드 IP로 외부 접근
+  # - LoadBalancer: 클라우드 로드밸런서 사용
+  type: LoadBalancer  # 외부 접근 허용
+  # Minikube는 실제 로드밸런서 없지만 시뮬레이션
+  
+  # Pod 선택
+  selector:
+    app: simple-app  # 이 라벨 가진 Pod로 트래픽 전송
+  
+  # 포트 매핑
+  ports:
+  - name: http
+    port: 80  # Service 포트 (외부에서 접속)
+    targetPort: 3000  # Pod 포트 (내부 포트)
+    protocol: TCP
+    # 왜 80? HTTP 기본 포트라서 :80 생략 가능
+  
+  # 세션 유지 설정
+  sessionAffinity: None  # 매번 다른 Pod로 분산
+  # ClientIP로 설정하면 같은 클라이언트는 같은 Pod로

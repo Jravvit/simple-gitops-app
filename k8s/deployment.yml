@@ -1,0 +1,86 @@
+# k8s/deployment.yaml 파일 생성
+
+# Deployment가 뭔가요?
+# - Pod(컨테이너)의 관리자
+# - 지정한 개수만큼 Pod 유지 (죽으면 자동 재시작)
+# - 롤링 업데이트 지원 (무중단 배포)
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simple-app
+  namespace: gitops-app  # 어느 namespace에 만들지
+  labels:
+    app: simple-app
+    version: v1
+spec:
+  # 복제본 설정
+  replicas: 2  # Pod 2개 실행
+  # 왜 2개? 하나 죽어도 서비스 유지 (고가용성)
+  
+  # 롤링 업데이트 전략
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1  # 업데이트 시 추가 Pod 1개까지 허용
+      maxUnavailable: 0  # 항상 모든 Pod 실행 유지
+      # 왜? 무중단 배포를 위해 (서비스 중단 없음)
+  
+  # Pod 선택자
+  selector:
+    matchLabels:
+      app: simple-app  # 이 라벨을 가진 Pod 관리
+  
+  # Pod 템플릿 (Pod 생성 설명서)
+  template:
+    metadata:
+      labels:
+        app: simple-app  # Pod에 붙일 라벨
+    spec:
+      containers:
+      - name: app
+        # ⚠️ [YOUR_DOCKER_USERNAME]을 실제 Docker Hub 사용자명으로 변경!
+        image: gaver1213/simple-gitops:latest
+        
+        ports:
+        - containerPort: 3000  # 컨테이너 포트
+          name: http
+        
+        # 환경변수 설정
+        # 왜? 앱에서 환경 정보를 알 수 있게
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name  # Pod 이름 자동 주입
+        
+        # 리소스 제한
+        # 왜 필요? 한 앱이 모든 리소스 독점 방지
+        resources:
+          requests:  # 최소 보장
+            cpu: "100m"  # 0.1 CPU
+            memory: "128Mi"  # 128MB
+          limits:  # 최대 사용 가능
+            cpu: "500m"  # 0.5 CPU
+            memory: "256Mi"  # 256MB
+        
+        # 헬스체크 설정
+        # Liveness: 살아있는지 확인 (죽으면 재시작)
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 30  # 시작 후 30초 대기
+          periodSeconds: 10  # 10초마다 체크
+          # 왜 대기? 앱 시작 시간 필요
+        
+        # Readiness: 트래픽 받을 준비됐는지
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          # 왜 필요? 준비 안된 Pod에 트래픽 보내지 않기 위해
