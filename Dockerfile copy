@@ -1,0 +1,44 @@
+# Dockerfile 파일 생성
+# 왜 Docker를 사용하나요?
+# - "내 컴퓨터에서는 되는데?"를 방지 (환경 통일)
+# - 어디서든 동일하게 실행 가능
+# - 배포가 간단해짐
+
+# Node.js 18 Alpine 이미지 사용
+# Alpine을 사용하는 이유: 초경량 리눅스(5MB)로 이미지 크기 최소화
+FROM node:18-alpine
+
+# 작업 디렉토리 설정
+# 왜 필요한가요? 컨테이너 내부의 파일 정리를 위해
+WORKDIR /app
+
+# package.json만 먼저 복사
+# 왜 따로 복사하나요?
+# - Docker 레이어 캐싱 활용
+# - package.json이 안 바뀌면 npm install 캐시 재사용 (빌드 속도 향상)
+COPY package.json .
+
+# 의존성 설치
+# --only=production: 개발용 패키지 제외 (이미지 크기 감소)
+RUN npm install --only=production
+
+# 소스코드 복사
+COPY app.js .
+
+# 빌드 시점에 버전 정보 받기
+# ARG: 빌드할 때만 사용하는 변수
+ARG APP_VERSION=v1.0.0
+
+# ENV: 컨테이너 실행 시 사용하는 환경변수
+# 왜 ENV로 다시 설정하나요? ARG는 빌드 후 사라지기 때문
+ENV APP_VERSION=${APP_VERSION}
+
+# 포트 노출
+# 왜 필요한가요? 문서화 목적 (실제로는 -p 옵션으로 매핑)
+EXPOSE 3000
+
+# 컨테이너 시작 명령
+# 왜 배열 형식을 사용하나요?
+# - Shell 거치지 않고 직접 실행 (보안, 성능 향상)
+# - 시그널 제대로 전달됨 (Graceful Shutdown 가능)
+CMD ["node", "app.js"] 
