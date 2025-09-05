@@ -40,7 +40,7 @@ spec:
       containers:
       - name: app
         # ⚠️ [YOUR_DOCKER_USERNAME]을 실제 Docker Hub 사용자명으로 변경!
-        image: gaver1213/simple-gitops:latest
+        image: gaver1213/simple-gitops:20250905-115051-3d2da71
         
         ports:
         - containerPort: 3000  # 컨테이너 포트
